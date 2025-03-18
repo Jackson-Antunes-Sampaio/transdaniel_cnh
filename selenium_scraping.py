@@ -22,7 +22,7 @@ driver = webdriver.Chrome(options=chrome_options)
 url = 'https://transito.mg.gov.br/infracoes/multa/consultar-pontuacao-cnh/'
 namePlan = 'Pontuacao_cnh.xlsx'
 
-def set_fields(df: pd.DataFrame, i : int, observacao : str = 'NADA CONSTA', placa : str  = 'NADA CONSTA', infracao: str  = 'NADA CONSTA', data_hora: str  = 'NADA CONSTA', local: str  = 'NADA CONSTA', pontos: str  = 'NADA CONSTA'):
+def set_fields(df: pd.DataFrame, i : int, observacao : str = '-', placa : str  = '-', infracao: str  = '-', data_hora: str  = '-', local: str  = '-', pontos: str  = '-'):
     
     df.loc[i,'Observação'] = observacao
     df.loc[i, 'Placa'] = placa
@@ -35,13 +35,14 @@ try:
 
     df = pd.read_excel(namePlan)
    
-    print(df.dtypes)
+    df = df.reset_index(drop=True)
+
     # Abrir o site
     driver.get(url)
     
     for i, row in df.iterrows():
-        
-        if(i > 2) : exit()
+        print(row['Observação'])
+        if pd.notnull(row['Observação']): continue
         print(f"INDEX: {i}")
         
 
@@ -140,16 +141,24 @@ try:
         # Imprimir os dados coletados
         print("\nDados coletados:")
         print("=" * 50)
-        for i in range(len(placas)):
-            print(f"Placa: {placas[i]}")
-            print(f"Infração: {infracoes[i]}")
-            print(f"Data/Hora: {datas_horas[i]}")
-            print(f"Local: {locais[i]}")
-            print(f"Pontos: {pontos[i]}")
+        for j in range(len(placas)):  # Mudando i para j no loop
+            print(f"Placa: {placas[j]}")
+            print(f"Infração: {infracoes[j]}")
+            print(f"Data/Hora: {datas_horas[j]}")
+            print(f"Local: {locais[j]}")
+            print(f"Pontos: {pontos[j]}")
             print("-" * 50)
         
-
-        set_fields(df, i, observacao="-", placa=placas[0], infracao=infracoes[0], data_hora=datas_horas[0], local=locais[0], pontos=int(pontos[0]))
+        # Salvando os dados usando o índice correto do DataFrame
+        set_fields(df, i, observacao="-", placa = ','.join(placas), infracao = ','.join(infracoes), data_hora= ','.join(datas_horas), local = ','.join(locais) , pontos=sum([int(item) for item in pontos]))
+        
+        print(f"\nSalvando dados para o índice {i} do DataFrame:")
+        print(f"CPF: {cpf}")
+        print(f"Placa: {placas[0]}")
+        print(f"Infração: {infracoes[0]}")
+        print(f"Data/Hora: {datas_horas[0]}")
+        print(f"Local: {locais[0]}")
+        print(f"Pontos: {pontos[0]}")
 
         # Aguardar um pouco antes de voltar
         time.sleep(2)
