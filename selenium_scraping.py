@@ -150,7 +150,7 @@ try:
             print("-" * 50)
         
         # Salvando os dados usando o índice correto do DataFrame
-        set_fields(df, i, observacao="-", placa = ','.join(placas), infracao = ','.join(infracoes), data_hora= ','.join(datas_horas), local = ','.join(locais) , pontos=sum([int(item) for item in pontos]))
+        set_fields(df, i, observacao="-", placa = ','.join(placas), infracao = ','.join(infracoes), data_hora= ','.join(datas_horas), local = ','.join(locais) , pontos=sum([int(item) if item.isnumeric() else 0 for item in pontos]))
         
         print(f"\nSalvando dados para o índice {i} do DataFrame:")
         print(f"CPF: {cpf}")
