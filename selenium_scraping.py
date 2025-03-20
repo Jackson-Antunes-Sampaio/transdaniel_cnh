@@ -66,7 +66,6 @@ try:
     driver.get(url)
     
     for i, row in df.iterrows():
-        print(row['Observação'])
         if pd.notnull(row['Observação']): continue
         print(f"INDEX: {i}")
         
@@ -113,24 +112,28 @@ try:
             if "NAO CONSTA PONTUACAO PARA ESSE CONDUTOR" in mensagem_sem_pontuacao.text:
                 print("\nNAO CONSTA PONTUACAO PARA ESSE CONDUTOR")
                 set_fields(df, i, observacao='NAO CONSTA PONTUACAO PARA ESSE CONDUTOR')
+                salvePrint(driver, now, cpf)
                 time.sleep(3)
                 continue
 
             if "NUMERO DO CPF INEXISTENTE" in mensagem_sem_pontuacao.text:
                 print("\nNUMERO DO CPF INEXISTENTE")
                 set_fields(df, i, observacao='NUMERO DO CPF INEXISTENTE')
+                salvePrint(driver, now, cpf)
                 time.sleep(3)
                 continue
 
             if "DATA DE NASCIMENTO INVALIDA" in mensagem_sem_pontuacao.text:
                 print("\nDATA DE NASCIMENTO INVALIDA")
                 set_fields(df, i, observacao='DATA DE NASCIMENTO INVALIDA')
+                salvePrint(driver, now, cpf)
                 time.sleep(3)
                 continue
 
             if "DATA DA PRIMEIRA HABILITACAO INVALIDA" in mensagem_sem_pontuacao.text:
                 print("\nDATA DA PRIMEIRA HABILITACAO INVALIDA")
                 set_fields(df, i, observacao='DATA DA PRIMEIRA HABILITACAO INVALIDA')
+                salvePrint(driver, now, cpf)
                 time.sleep(3)
                 continue
 
@@ -191,7 +194,7 @@ try:
         # Clicar no botão Voltar
         # botao_voltar = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="content"]/div[3]/div[1]/a')))
         # botao_voltar.click()
-        driver.refresh()
+        driver.get(driver.current_url)
         
         # Aguardar a página voltar ao estado inicial
         time.sleep(3)
