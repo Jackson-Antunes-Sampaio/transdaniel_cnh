@@ -1,11 +1,15 @@
+import base64
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.print_page_options import PrintOptions
 import pandas as pd
 import time
+import os
+from datetime import datetime
 
 # Configuração do Chrome
 chrome_options = Options()
@@ -16,6 +20,9 @@ chrome_options.add_argument('--disable-popup-blocking')
 
 # Inicializar o driver
 driver = webdriver.Chrome(options=chrome_options)
+
+def getDirCurrent():
+    return os.getcwd()
 
 # URL do site
 
@@ -31,11 +38,29 @@ def set_fields(df: pd.DataFrame, i : int, observacao : str = '-', placa : str  =
     df.loc[i, 'Local'] = local
     df.loc[i, 'Pontos'] = pontos
 
+def salvePrint(driver, now, cpf):
+    print_options = PrintOptions()
+    pdf = driver.print_page(print_options)
+
+        # Diretório onde o arquivo será salvo
+    save_dir = os.path.join(getDirCurrent(), "pdfs")
+
+        # Criando a pasta caso não exista
+    os.makedirs(save_dir, exist_ok=True)
+
+        # Caminho completo do arquivo
+    file_path = os.path.join(save_dir, f"{cpf} {now}.pdf")
+
+    with open(file_path, 'wb') as theFile:
+        theFile.write(base64.b64decode(pdf))
+
 try:
 
     df = pd.read_excel(namePlan)
    
     df = df.reset_index(drop=True)
+
+    now = datetime.now().strftime("%d-%m-%Y %H-%M-%S")
 
     # Abrir o site
     driver.get(url)
@@ -80,8 +105,8 @@ try:
         botao_consultar.click()
         
         # Aguardar a resposta carregar
-        time.sleep(5)
-        
+        time.sleep(10)
+
         # Verificar se existe a mensagem de não pontuação
         try:
             mensagem_sem_pontuacao = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="content"]/div')))
@@ -113,8 +138,6 @@ try:
                 
         except:
             pass
-        
-        # Encontrar a tabela
         
         tabela = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="content"]/div[3]/div[1]/table')))
 
@@ -160,13 +183,15 @@ try:
         print(f"Local: {locais[0]}")
         print(f"Pontos: {pontos[0]}")
 
+        salvePrint(driver, now, cpf)
+
         # Aguardar um pouco antes de voltar
         time.sleep(2)
         
         # Clicar no botão Voltar
         # botao_voltar = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="content"]/div[3]/div[1]/a')))
         # botao_voltar.click()
-        driver.get(url)
+        driver.refresh()
         
         # Aguardar a página voltar ao estado inicial
         time.sleep(3)

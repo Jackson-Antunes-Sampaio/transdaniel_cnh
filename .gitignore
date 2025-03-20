@@ -157,6 +157,7 @@ dmypy.json
 /output/*.exe
 # pytype static type analyzer
 .pytype/
+pdfs/
 
 # Cython debug symbols
 cython_debug/
